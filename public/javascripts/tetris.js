@@ -1,4 +1,4 @@
-function tetris() {
+function Tetris() {
   
   /** Formes en matrice */
   var ZF = [
@@ -191,19 +191,21 @@ function tetris() {
   ];
   
   /* Taille du cube de base de toutes les shape */
-  var CUBE_SIZE = 30;
-
-  /* Couleurs des formes */
-  var formColor = new Array("#81e7f5","#0eb16c","#404fff","#fcd836","#c681f5","#7ffd29","#ff0000","#ff0001");
+  var CUBE_SIZE;
 
   /** Taille du plan en pixel */
-  var PLAYGROUND_HEIGHT = 600;
-  var PLAYGROUND_WIDTH = 300;
-  var PLAYGROUND_IMAGE = "/images/background.png"; // ajout d'une image sur le fond 
+  var PLAYGROUND_HEIGHT;
+  var PLAYGROUND_WIDTH;
+  var PLAYGROUND_IMAGE; // ajout d'une image sur le fond 
 
   /* Canvas */
   var canvas = $('#tetris');
   var ctx = canvas[0].getContext('2d');
+	var STROKE_STYLE;
+	var FILL_STYLE;	
+
+  /* Couleurs des formes */
+  var FORM_COLOR;
 
   /* Touches clavier */
   var LeftNN  ='37';
@@ -218,23 +220,27 @@ function tetris() {
   var DownIE  ='';
   var SpaceIE ='';
 
-  var speed = 2;
-  var nbLines;
+  var nbLines = 0;
+	var movedDown = false;
   var XP= 3;
   var YP= -1;
   var ROT= 0;
   var POS= 0;
+  var SPEED;
+	var time = 0;
 
   // la surface du jeu
-  var TX=10;
-  var TY=20;
+  var TX;
+  var TY;
   var PLAN = new Array();
 
   var currentShape;
   var nextShape;
-  var intervalId;
-  
-  
+  var timerId;
+  var oldTimerId;
+	var socket = io.connect('http://localhost');
+	var stats = new Stats();	
+
   createPlan = function(plan) {
     // on cree les lignes les unes après les autres
     for(var i=0; i<TY; i++)
@@ -244,14 +250,6 @@ function tetris() {
     for(var i=0; i<TY; i++)
        for(var j=0; j<TX; j++)
           plan[i][j] = 0;  
-  }
-
-  init = function(){
-    // keyboard listener
-    document.onkeydown = keyDown;
-    document.onkeyup = keyUp;
-    createPlan(PLAN);
-    drawBackground();
   }
 
   // Keylistener down
@@ -276,7 +274,7 @@ function tetris() {
     }  
 
     if( DownNN.indexOf(KeyNN)!=-1  || DownIE.indexOf(KeyIE)!=-1 ){
-      moveDown();
+      forceMoveDown();
     }  
 
     if( SpaceNN.indexOf(KeyNN)!=-1  || SpaceIE.indexOf(KeyIE)!=-1 ){
@@ -295,26 +293,27 @@ function tetris() {
     //console.log('keyUp KeyNN_='+KeyNN_+', KeyIE_='+KeyIE_);  
 
     if( DownNN.indexOf(KeyNN)!=-1  || DownIE.indexOf(KeyIE)!=-1 ){
-      moveDownUp();
+      forceMoveDownUp();
     }  
   }
 
   drawBackground = function(){
-    ctx.fillStyle = "#fff";
-    ctx.strokeStyle = "#000";
+    ctx.fillStyle = FILL_STYLE;
+    ctx.strokeStyle = STROKE_STYLE;
     ctx.fillRect(0,0,PLAYGROUND_WIDTH,PLAYGROUND_HEIGHT);
     ctx.strokeRect(0,0,PLAYGROUND_WIDTH,PLAYGROUND_HEIGHT); 
     drawGrid();
   }
 
   drawGrid = function() {
-    drawHorizontalGrid();
+    //drawHorizontalGrid();
     drawVerticalGrid();
   }
 
   drawHorizontalGrid = function() {
     for(var i=0;i<=(PLAYGROUND_HEIGHT/30)-1;i++){
       ctx.beginPath();
+    	ctx.strokeStyle = "#0a1d36";			
       ctx.moveTo(0,i*30);
       ctx.lineWidth = 0.2;
       ctx.lineTo(PLAYGROUND_WIDTH,i*30);
@@ -326,6 +325,7 @@ function tetris() {
   drawVerticalGrid = function() {
     for(var i=0;i<=(PLAYGROUND_WIDTH/30)-1;i++){
       ctx.beginPath();
+    	ctx.strokeStyle = "#0a1d36";			
       ctx.moveTo(i*30,0);
       ctx.lineWidth = 0.2;
       ctx.lineTo(i*30,PLAYGROUND_HEIGHT);
@@ -336,13 +336,27 @@ function tetris() {
 
   initShape = function(){
     switch(Math.round(Math.random()*6)){
-  		case 0 : return ZF;
-  		case 1 : return SF;
-  		case 2 : return JF;
-  		case 3 : return LF;
-  		case 4 : return TF;
-  		case 5 : return IF;
-  		case 6 : return OF;
+  		case 0 : 
+				stats.setShape(1);
+				return ZF;
+  		case 1 : 
+				stats.setShape(2);
+				return SF;
+  		case 2 : 
+				stats.setShape(3);
+				return JF;
+  		case 3 : 
+				stats.setShape(4);
+				return LF;
+  		case 4 : 
+				stats.setShape(5);
+				return TF;
+  		case 5 : 
+				stats.setShape(6);
+				return IF;
+  		case 6 : 
+				stats.setShape(7);
+				return OF;
     }
   	return null;
   }
@@ -391,15 +405,17 @@ function tetris() {
       ROT=next;
   }
 
-  moveDown = function(){
+  forceMoveDown = function(){
   	var speedDown=30;
-  	clearInterval(intervalId);
-    intervalId = setInterval(loop, 1000/ speedDown);  
+  	clearInterval(timerId);
+    timerId = setInterval(main, 1000/ speedDown);  
+		movedDown = true;
   }
 
-  moveDownUp = function(){
-    clearInterval(intervalId);
-    intervalId = setInterval(loop, 1000/ speed);		
+  forceMoveDownUp = function(){
+    clearInterval(timerId);
+    timerId = setInterval(main, 1000/ SPEED);
+		movedDown = false;
   }
 
   fall = function(){
@@ -427,7 +443,7 @@ function tetris() {
         if(shape[ROT][y][x]){
           x2=x+XP;
           y2=y+YP;
-          drawCube(x2*CUBE_SIZE,y2*CUBE_SIZE,formColor[shape[ROT][y][x]]);
+          drawCube(x2*CUBE_SIZE,y2*CUBE_SIZE,FORM_COLOR[shape[ROT][y][x]]);
         }        
       }
     }
@@ -438,17 +454,17 @@ function tetris() {
     for(var i=0; i<TY; i++){
       for(var j=0; j<TX; j++){			
         if(PLAN[i][j] != 0){
-          drawCube(j*CUBE_SIZE,i*CUBE_SIZE,formColor[PLAN[i][j]]);
+          drawCube(j*CUBE_SIZE,i*CUBE_SIZE,FORM_COLOR[PLAN[i][j]]);
         }
       }
     }
   }
 
   drawCube = function(x,y,color) {
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = "#194681";
     ctx.fillRect(x,y,CUBE_SIZE,CUBE_SIZE);  
     ctx.fillStyle = color;
-    ctx.fillRect(x+4,y+4,22,22);
+    ctx.fillRect(x+4,y+4,26,26);
   }
 
   countEmptyLines = function(lines) {
@@ -505,44 +521,226 @@ function tetris() {
     return res;
   }
 
-  loop = function(){    
-  	var lines=[TY];
+  main = function(){    
+  	var lines=[TY];		
   	var rem;
-    var pos=down(currentShape);	
+    var pos= down(currentShape);
+		var piece;
 
-  	// si impossibilité nouvelle pièce fin de la partie
+		// if (piece>niveau[SPEED]){
+		// 	console.log("niveau[speed]:"+niveau[SPEED]);
+		// }
+
+  	// si impossibilité nouvelle pièce ou temps écoulé fin de la partie
     if (pos==-1){
-  		clearInterval(intervalId);
+  		clearInterval(timerId);
+			stats.stop();
+
   	} else if(pos==0) {
   	  // pièce suivante
   	  fixShape(currentShape);
   	  initNextShape();
+
   	  // compter lignes finies et les enlever
   		if (rem=countEmptyLines(lines)){
   	  	removeEmptyLines(lines);
+
         // mise à jour nombre de lignes finies
   			nbLines+=rem;
-  		}  
+				stats.setLines(stats.getLines() + nbLines);
+				stats.setScore(stats.getScore() + (1000 * stats.getLevel() * nbLines));
+				// if(movedDown){
+				// 	stats.setScore(stats.getScore() + 5 + stats.getLevel());
+				// }
+
+			  // mise à jour speed 
+			  //SPEED=nbLines/2;
+			  if (SPEED>=25){
+			     //prévoir qqchose : jeu gagné
+			  }
+
+  		}
   	}
   }
+	
+	// Lancement du jeu
+  this.start = function() {	
+    if(ctx){
+	    // keyboard listener
+	    document.onkeydown = keyDown;
+	    document.onkeyup = keyUp;
 
-  this.startGame = function() {
-    if(ctx){    
-      init();
-      var niveau= [70, 65, 60, 55, 50, 45, 40, 35, 30, 26, 22, 19, 
-                      16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2, 1, 0];  
+		  socket.emit('init_game');		
+		  socket.on('init_game', function (data) {
 
-      currentShape = initShape();
-      nextShape = initShape();    
-      intervalId = setInterval(loop, 1000/ speed);
+				PLAYGROUND_IMAGE 	= data.parameters.playgroundImage;
+				PLAYGROUND_HEIGHT = data.parameters.playgroundHeight;
+				PLAYGROUND_WIDTH 	= data.parameters.playgroundWidth;								
+				PLAYGROUND_IMAGE 	= data.parameters.playgroundImage;
+				CUBE_SIZE 				= data.parameters.cubeSize;
+				TX 								= data.parameters.tx;
+				TY 								= data.parameters.ty;
+	 			FORM_COLOR 				= data.parameters.formColor;
+				STROKE_STYLE 			= data.parameters.strokeStyle;
+				FILL_STYLE 				= data.parameters.fillStyle;
+				SPEED 						= data.parameters.speed;
+
+		    createPlan(PLAN);
+		    drawBackground();		
+		    currentShape = initShape();
+		    nextShape = initShape();
+				timerId = setInterval(main, 1000/ SPEED);						
+				stats.start();				
+		  });
 
     } else {
       alert('No 2d context');
     }  
   }
+
+	this.pause = function() {		
+		stats.pause();				
+		if(timerId>0){
+	 		clearInterval(timerId);
+			timerId=0;	
+		} else {
+      timerId = setInterval(main, 1000/ SPEED);			
+		}
+	}
+	
+	this.highscores = function() {
+		
+	}
   
+	this.about = function() {
+		
+	}
+
 }
 
-// Lancement du jeu
-var tetris = new tetris();
-tetris.startGame();
+function Stats(){
+	var level;
+	var time;
+	var lines;
+	var score;
+	var shape;
+	
+	var drawInterval = 50;
+	var frameCount = 0;
+	var fps = 0;
+	var maxfps;
+	var lastTime;
+
+	var timerId = null;	
+	var fpsId = null;	
+		
+	var el = {
+		"level": $(".tetris_level"),
+		"time":  $(".tetris_time"),
+		"fps":   $(".tetris_fps"),
+		"lines": $(".tetris_lines"),
+		"score": $(".tetris_score"),
+		"shape": $(".shape")		
+	}
+	
+	updateFps = function(){
+		var now = new Date();
+		var diffTime = Math.ceil((now.getTime() - lastTime.getTime()));
+		if (diffTime >= 1000) {
+			fps = frameCount;
+			frameCount = 0.0;
+			lastTime = now;
+		}		
+		el.fps.html(fps + '/' + maxfps);					
+		frameCount++;		
+	  setTimeout( this.updateFps, drawInterval );
+	}	
+	
+	incTime = function() {
+		time++;
+		el.time.html(time);
+		//updateFps();
+	}
+
+	reset = function() {		
+		this.stop();
+		level = 1;
+		time  = 0;
+		shape = null;
+		fps   = 0;
+		lines = 0;
+		score = 0;
+		maxfps = 1 / (drawInterval / 1000);
+		lastTime = new Date();
+
+		el.level.html(level);
+		el.time.html(time);
+		el.fps.html(fps);
+		el.lines.html(lines);
+		el.score.html(score);
+	}
+
+	this.start = function() {
+		reset();
+		timerId = setInterval(incTime, 1000);
+	}
+
+	this.pause = function(){
+		if(timerId>0){
+	 		clearInterval(timerId);				
+			timerId=0;
+		} else {
+			timerId = setInterval(incTime, 1000);			
+		}
+	}
+
+	this.stop = function()
+	{
+		if (timerId) {
+			clearInterval(timerId);
+		}
+	}
+	
+	this.setScore = function(i) {
+		score = i;
+		el.score.html(score);
+	}
+	
+	this.setLevel = function(i){
+		level = i;
+		el.level.html(level);		
+	}
+
+	this.setTime = function(i){
+		time = i;
+		el.time.html(time);				
+	}
+
+	this.setLines = function(i){
+		lines = i;
+		el.lines.html(lines);				
+	}
+
+	this.setShape = function(i){
+		shape = i;
+		var img = '<img src="/images/shapes/'+shape+'.png">';
+		el.shape.html(img);				
+	}
+	
+	this.getScore = function() {
+		return score;
+	}
+
+	this.getLevel = function() {
+		return level;
+	}
+	
+	this.getTime = function() {
+		return time;
+	}
+
+	this.getLines = function() {
+		return lines;
+	}
+	
+}

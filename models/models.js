@@ -14,21 +14,10 @@ exports.init = function(db) {
     updated_at      : {type : Date, default : Date.now}
   });
 
+
   // register models into db
   db.model('Player', Player);
   var Player = exports.Player = db.model('Player');
-
-  // add default value for player
-  var player = new Player({
-    username: 'flasomm',
-    email: 'flasomm@gmail.com',
-    firstname: 'Fabrice',
-    lastname: 'Sommavilla',
-    birthdate: new Date(1974, 4, 24)
-  });
-  player.save(function (err) {
-    //
-  });
   
 };
 

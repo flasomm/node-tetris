@@ -3,7 +3,7 @@ function gameSocket() {
   
   this.test = function(){
     socket.on('game', function (data) {
-      console.log(data.length);
+      console.log("data:"+data.player);
       socket.emit('my other event', { my: 'data' });
     });    
   }

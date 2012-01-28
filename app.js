@@ -2,7 +2,6 @@
 /**
  * Module dependencies.
  */
-
 var express = require('express');
 var app = module.exports = express.createServer();
 var io = require('socket.io').listen(app);
@@ -11,7 +10,6 @@ var io = require('socket.io').listen(app);
 // Configuration
 
 // Database
-
 var db = require('mongoose');
 db.connect('mongodb://localhost/tetris');
 Schema = db.Schema,
@@ -21,9 +19,9 @@ ObjectId = Schema.ObjectId;
 
 var models = require('./models/models').init(db);
 var player = require('./models/player');
+var game = require('./models/game');
 
 // app
-
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -41,19 +39,25 @@ app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
 
-// Routes
+// Setup default objets (admin)
+player.install();	
 
+
+// Routes
 app.get('/', function(req, res){
   res.render('index', {
-    title: 'Tetris'
+    title: 'Node Tetris'
   });
 });
 
 io.sockets.on('connection', function (socket) {
-  socket.emit('game', { player: player.list });
-  socket.on('my other event', function (data) {
-    console.log(data);
+
+  socket.on('init_game', function (data) {
+			game.init( function(result) {
+					socket.emit('init_game', { parameters: result });
+			});			
   });
+
 });
 
 // User

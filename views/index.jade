@@ -1,10 +1,45 @@
-h1= title
-p Tetris World
+#page
+	#header
+		h1= title + " v0.1"
 
-canvas#tetris(width=300,height=600)
+	#game
+		.tetris
+			canvas#tetris(width=300,height=600)
+		.stats
+			.top_stats
+				.shapes
+					.shape
+				.command
+					.new_game
+						input(type="button", name="", onclick="window.location.reload()", value="New Game")
+					.pause
+						input(type="button", name="", onclick="tetris.pause()", value="Pause")
+					.highscores
+						input(type="button", name="", onclick="tetris.highscores()", value="Highscores")
+					.about
+						input(type="button", name="", onclick="tetris.about()", value="About")
+			.bottom_stats
+				.statistics
+					h2 Statistics
+					.level Level: 
+					.tetris_level
+					.score Score: 
+					.tetris_score
+					.lines Lines:
+					.tetris_lines
+					.fps FPS:
+					.tetris_fps
+					.time Time:  
+					.tetris_time
+				.keyboard
+					h2 Keyboard
+					p Rotate
+					p Move
+					p Fall
 
-
-script(src="/javascripts/tetris.js", type="application/javascript")    
-script(src="/socket.io/socket.io.js", type="application/javascript")    
-script(src="/javascripts/socket.js", type="application/javascript") 
-
+	
+	script(src="/socket.io/socket.io.js", type="application/javascript")
+	script(src="/javascripts/tetris.js", type="application/javascript")
+	script
+		var tetris = new Tetris();
+		tetris.start()
