@@ -1,194 +1,7 @@
 function Tetris() {
   
-  /** Formes en matrice */
-  var ZF = [
-            [
-              [0,1,0,0],
-              [0,1,1,0],
-              [0,0,1,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,1,1,0],
-              [1,1,0,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,1,0,0], 
-              [0,1,1,0],
-              [0,0,1,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,1,1,0],
-              [1,1,0,0],
-              [0,0,0,0]
-            ]
-  ];
-
-  var SF = [
-            [
-              [0,0,2,0], 
-              [0,2,2,0],
-              [0,2,0,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [2,2,0,0],
-              [0,2,2,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,2,0], 
-              [0,2,2,0],
-              [0,2,0,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [2,2,0,0],
-              [0,2,2,0],
-              [0,0,0,0]
-            ]
-  ];
-
-  var JF = [
-            [
-              [0,3,0,0], 
-              [0,3,0,0],
-              [0,3,3,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,3,3,3],
-              [0,3,0,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,3,3,0],
-              [0,0,3,0],
-              [0,0,3,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,0,3,0],
-              [3,3,3,0],
-              [0,0,0,0]
-            ]
-  ];
-
-  var LF = [
-            [
-              [0,0,0,0], 
-              [0,4,4,0],
-              [0,4,0,0],
-              [0,4,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [4,4,4,0],
-              [0,0,4,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,4,0], 
-              [0,0,4,0],
-              [0,4,4,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,4,0,0],
-              [0,4,4,4],
-              [0,0,0,0]
-            ]
-  ];
-
-  var TF = [
-            [
-              [0,5,0,0],
-              [0,5,5,0],
-              [0,5,0,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,0,0], 
-              [5,5,5,0],
-              [0,5,0,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,5,0,0], 
-              [5,5,0,0],
-              [0,5,0,0],
-              [0,0,0,0]
-            ],
-            [
-              [0,5,0,0], 
-              [5,5,5,0],
-              [0,0,0,0],
-              [0,0,0,0]
-            ]
-  ];
-
-  var IF = [
-            [
-              [0,0,6,0], 
-              [0,0,6,0],
-              [0,0,6,0],
-              [0,0,6,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,0,0,0],
-              [6,6,6,6],
-              [0,0,0,0]
-            ],
-            [
-              [0,0,6,0], 
-              [0,0,6,0],
-              [0,0,6,0],
-              [0,0,6,0]
-            ],
-            [
-              [0,0,0,0], 
-              [0,0,0,0],
-              [6,6,6,6],
-              [0,0,0,0]
-            ]
-  ];
-
-  var OF = [
-            [
-              [0,7,7,0], 
-              [0,7,7,0],
-              [0,0,0,0],
-              [0,0,0,0]
-            ],
-            [
-  	          [0,7,7,0], 
-  	          [0,7,7,0],
-  	          [0,0,0,0],
-  	          [0,0,0,0]
-            ],
-            [
-  	          [0,7,7,0], 
-  	          [0,7,7,0],
-  	          [0,0,0,0],
-  	          [0,0,0,0]
-            ],
-            [
-  	          [0,7,7,0], 
-  	          [0,7,7,0],
-  	          [0,0,0,0],
-  	          [0,0,0,0]
-            ]
-  ];
+  /** Formes */
+  var ZF,SF,JF,LF,TF,IF,OF;
   
   /* Taille du cube de base de toutes les shape */
   var CUBE_SIZE;
@@ -297,43 +110,6 @@ function Tetris() {
     }  
   }
 
-  drawBackground = function(){
-    ctx.fillStyle = FILL_STYLE;
-    ctx.strokeStyle = STROKE_STYLE;
-    ctx.fillRect(0,0,PLAYGROUND_WIDTH,PLAYGROUND_HEIGHT);
-    ctx.strokeRect(0,0,PLAYGROUND_WIDTH,PLAYGROUND_HEIGHT); 
-    drawGrid();
-  }
-
-  drawGrid = function() {
-    //drawHorizontalGrid();
-    drawVerticalGrid();
-  }
-
-  drawHorizontalGrid = function() {
-    for(var i=0;i<=(PLAYGROUND_HEIGHT/30)-1;i++){
-      ctx.beginPath();
-    	ctx.strokeStyle = "#0a1d36";			
-      ctx.moveTo(0,i*30);
-      ctx.lineWidth = 0.2;
-      ctx.lineTo(PLAYGROUND_WIDTH,i*30);
-      ctx.closePath();
-      ctx.stroke();
-    }
-  }
-
-  drawVerticalGrid = function() {
-    for(var i=0;i<=(PLAYGROUND_WIDTH/30)-1;i++){
-      ctx.beginPath();
-    	ctx.strokeStyle = "#0a1d36";			
-      ctx.moveTo(i*30,0);
-      ctx.lineWidth = 0.2;
-      ctx.lineTo(i*30,PLAYGROUND_HEIGHT);
-      ctx.closePath();
-      ctx.stroke();
-    }
-  }
-
   initShape = function(){
     switch(Math.round(Math.random()*6)){
   		case 0 : 
@@ -377,7 +153,7 @@ function Tetris() {
         if ( shape[ROT][y][x] && ( (XP-1+x<0) 
           || (PLAN[(YP+y)] && PLAN[(YP+y)][(XP-1+x)]) )  )
           return;
-        XP--;  
+			XP--;  
   }
 
   moveRight = function(shape){
@@ -422,6 +198,45 @@ function Tetris() {
     // todo
   }
 
+  drawBackground = function(){
+		ctx.globalCompositeOperation = 'source-over';
+		ctx.clearRect(0, 0, PLAYGROUND_WIDTH, PLAYGROUND_HEIGHT);	
+    ctx.fillStyle = FILL_STYLE;
+    ctx.strokeStyle = STROKE_STYLE;
+    ctx.fillRect(0,0,PLAYGROUND_WIDTH,PLAYGROUND_HEIGHT);
+    ctx.strokeRect(0,0,PLAYGROUND_WIDTH,PLAYGROUND_HEIGHT); 
+    drawGrid();
+  }
+
+  drawGrid = function() {
+    //drawHorizontalGrid();
+    drawVerticalGrid();
+  }
+
+  drawHorizontalGrid = function() {
+    for(var i=0;i<=(PLAYGROUND_HEIGHT/30)-1;i++){
+      ctx.beginPath();
+    	ctx.strokeStyle = "#0a1d36";			
+      ctx.moveTo(0,i*30);
+      ctx.lineWidth = 0.2;
+      ctx.lineTo(PLAYGROUND_WIDTH,i*30);
+      ctx.closePath();
+      ctx.stroke();
+    }
+  }
+
+  drawVerticalGrid = function() {
+    for(var i=0;i<=(PLAYGROUND_WIDTH/30)-1;i++){
+      ctx.beginPath();
+    	ctx.strokeStyle = "#0a1d36";			
+      ctx.moveTo(i*30,0);
+      ctx.lineWidth = 0.2;
+      ctx.lineTo(i*30,PLAYGROUND_HEIGHT);
+      ctx.closePath();
+      ctx.stroke();
+    }
+  }
+
   fixShape = function(shape){
     var x,y;
     for (y=0; y<4; y++){
@@ -437,17 +252,17 @@ function Tetris() {
 
   drawShape = function(shape){
     var x,y;
-    drawBackground();    
+		drawBackground();
     for(y=0; y<4; y++) {
       for(x=0; x<4; x++) {
         if(shape[ROT][y][x]){
-          x2=x+XP;
-          y2=y+YP;
+  				var y2 = (YP+y);
+  				var x2 = (XP+x);
           drawCube(x2*CUBE_SIZE,y2*CUBE_SIZE,FORM_COLOR[shape[ROT][y][x]]);
         }        
       }
     }
-    redrawPlan();
+		redrawPlan();
   }
 
   redrawPlan = function(){
@@ -584,6 +399,13 @@ function Tetris() {
 				STROKE_STYLE 			= data.parameters.strokeStyle;
 				FILL_STYLE 				= data.parameters.fillStyle;
 				SPEED 						= data.parameters.speed;
+				ZF								= data.parameters.ZF;
+				SF								= data.parameters.SF;
+				JF								= data.parameters.JF;
+				LF								= data.parameters.LF;
+				TF								= data.parameters.TF;
+				IF								= data.parameters.IF;
+				OF								= data.parameters.OF;
 
 		    createPlan(PLAN);
 		    drawBackground();		
