@@ -53,30 +53,34 @@ var TX=10;
 var TY=20;
 
 exports.init = function(callback){
-	var parameters = {'fillStyle':fillStyle, 
-										'strokeStyle':strokeStyle, 
-										'playgroundWidth':PLAYGROUND_WIDTH, 
-										'playgroundHeight':PLAYGROUND_HEIGHT, 
-										'cubeSize':CUBE_SIZE,
-										'formColor': {'0':formColor[0],
-																	'1':formColor[1],
-																	'2':formColor[2],
-																	'3':formColor[3],
-																	'4':formColor[4],
-																	'5':formColor[5],
-																	'6':formColor[6],
-																	'7':formColor[7]},
-										'playgroundImage':PLAYGROUND_IMAGE,
-										'speed':speed,
-										'tx': TX,
-										'ty': TY,
-										'OF': OF,
-										'IF': IF,
-										'TF': TF,
-										'LF': LF,
-										'JF': JF,
-										'SF': SF,
-										'ZF': ZF};
+	var parameters = {
+		'fillStyle':fillStyle, 
+		'strokeStyle':strokeStyle, 
+		'playgroundWidth':PLAYGROUND_WIDTH, 
+		'playgroundHeight':PLAYGROUND_HEIGHT, 
+		'cubeSize':CUBE_SIZE,
+		'formColor': {
+			'0':formColor[0],
+			'1':formColor[1],
+			'2':formColor[2],
+			'3':formColor[3],
+			'4':formColor[4],
+			'5':formColor[5],
+			'6':formColor[6],
+			'7':formColor[7]
+		},
+		'playgroundImage':PLAYGROUND_IMAGE,
+		'speed':speed,
+		'tx': TX,
+		'ty': TY,
+		'OF': OF,
+		'IF': IF,
+		'TF': TF,
+		'LF': LF,
+		'JF': JF,
+		'SF': SF,
+		'ZF': ZF
+	};
 	callback(parameters);
 	return;
 };
